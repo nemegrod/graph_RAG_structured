@@ -1,0 +1,29 @@
+@prefix ont: <http://example.org/ontology#> .
+@prefix res: <http://example.org/resource#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix ottr: <http://ns.ottr.xyz/0.4/> .
+
+ont:JaguarInstance [
+  <http://ns.ottr.xyz/0.4/IRI> ?id,
+  <http://www.w3.org/2001/XMLSchema#string> ?name,
+  <http://www.w3.org/2001/XMLSchema#string> ?gender,
+  <http://ns.ottr.xyz/0.4/IRI> ?location_iri,
+  <http://ns.ottr.xyz/0.4/IRI> ?monitoring_org_iri,
+  <http://www.w3.org/2001/XMLSchema#string> ?first_sighted,
+  <http://www.w3.org/2001/XMLSchema#boolean> ?is_killed,
+  ? <http://www.w3.org/2001/XMLSchema#string> ?cause_of_death,
+  ? <http://www.w3.org/2001/XMLSchema#string> ?identification_mark
+] :: {
+  ottr:Triple(?id, a, ont:Jaguar),
+  ottr:Triple(?id, rdfs:label, ?name),
+  ottr:Triple(?id, ont:scientificName, "Panthera onca"),
+  ottr:Triple(?id, ont:hasGender, ?gender),
+  ottr:Triple(?id, ont:occursIn, ?location_iri),
+  ottr:Triple(?id, ont:monitoredByOrg, ?monitoring_org_iri),
+  ottr:Triple(?id, ont:hasMonitoringStartDate, ?first_sighted),
+  ottr:Triple(?id, ont:wasKilled, ?is_killed),
+  ottr:Triple(?id, ont:causeOfDeath, ?cause_of_death),
+  ottr:Triple(?id, ont:hasIdentificationMark, ?identification_mark),
+  ottr:Triple(?id, ont:hasDietType, res:CarnivoreDiet)
+} .

@@ -67,3 +67,8 @@ data/corpus/*.txt
 # OS
 Thumbs.db
 .DS_Store
+
+#Project context
+.cursor*
+.claude*
+examples

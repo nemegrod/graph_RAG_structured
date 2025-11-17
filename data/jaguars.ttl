@@ -17,6 +17,9 @@
 
 :Arizona a ont:State ; ont:locatedInCountry :USA ; rdfs:label "Arizona" .
 :Sonora a ont:State ; ont:locatedInCountry :Mexico ; rdfs:label "Sonora" .
+:Corrientes a ont:State ;
+  ont:locatedInCountry :Argentina ;
+  rdfs:label "Corrientes" .
 
 :WhetstoneMountains a ont:MountainRange ; rdfs:label "Whetstone Mountains" .
 :SantaRitaMountains a ont:MountainRange ; rdfs:label "Santa Rita Mountains" .
@@ -43,8 +46,15 @@
 #############################
 
 :PantanalWetland a ont:Wetland ; ont:locatedIn :PantanalRegion ; rdfs:label "Pantanal wetland habitat" .
-:IberaWetlandHabitat a ont:Wetland ; ont:locatedIn :IberaWetlandsArea ; rdfs:label "Iberá wetland habitat" .
-:SkyIslandsForest a ont:Forest ; ont:locatedIn :SkyIslandsBorderlands ; rdfs:label "Sky Islands montane forest" .
+:IberaWetlandHabitat a ont:Wetland ;
+  ont:locatedIn :IberaWetlandsArea ;
+  ont:locatedIn :Corrientes ;
+  rdfs:label "Iberá wetland habitat" .
+:SkyIslandsForest a ont:Forest ;
+  ont:locatedIn :SkyIslandsBorderlands ;
+  ont:locatedIn :Arizona ;
+  ont:locatedIn :Sonora ;
+  rdfs:label "Sky Islands montane forest" .
 
 #############################
 # Monitoring Techniques (instances)

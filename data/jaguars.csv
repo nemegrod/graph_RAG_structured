@@ -1,0 +1,9 @@
+jaguar_id,name,gender,location,monitoring_org,first_sighted,is_killed,cause_of_death,identification_mark
+ElJefe,El Jefe,Male,Arizona,AZGFD,2011-11-19,false,,Distinctive rosette pattern resembling Betty Boop on left flank
+MachoB,Macho B,Male,Arizona,AZGFD,1996-01-01,true,Euthanized due to irreversible renal failure following capture in 2009,Distinct left flank mark resembling Betty Boop
+Sombra,Sombra,Male,Arizona,AZGFD,2016-11-01,false,,Shadow-like spot pattern on shoulders
+YoOko,Yo'oko,Male,Arizona,AZGFD,2016-05-01,true,Poached in Sonora Mexico in 2017,Unique rosette pattern with distinctive throat markings
+Cochise,Cochise,Male,Arizona,AZGFD,2023-12-20,false,,Distinctive facial markings and large rosettes
+Asa,Asa,Female,Pantanal,PantanalJaguarProject,2008-03-15,false,,Light colored coat with widely spaced rosettes
+Mick,Mick,Male,Pantanal,PantanalJaguarProject,2015-06-22,false,,Large male with prominent rosettes
+Ferinha,Ferinha,Female,Pantanal,PantanalJaguarProject,2012-09-10,false,,Small female with dense rosette pattern
