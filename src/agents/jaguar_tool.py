@@ -4,16 +4,14 @@ Jaguar Knowledge Graph Query Tool
 This module provides a SPARQL query interface for the jaguar conservation
 knowledge graph using Maplib (in-memory RDF store).
 
-The knowledge graph is built from:
-- Ontology: data/jaguar_ontology.ttl (classes, properties, semantics)
-- Instances: data/jaguars.ttl (actual jaguars, locations, organizations)
+The knowledge graph is built in main.py using the production pipeline:
+1. Load ontology (data/jaguar_ontology.ttl)
+2. Load OTTR template (data/jaguar_template.ottr)
+3. Transform CSV to RDF (data/jaguars.csv)
+4. Optionally load additional manually-curated data (data/jaguars.ttl)
 
-The instance data can be created via:
-1. csv2graph_maplib.ipynb - Transform CSV to RDF using OTTR templates
-2. Manual RDF authoring in Turtle format
-
-This tool simply loads the pre-built graph and provides SPARQL querying.
-For graph construction workflow, see csv2graph_maplib.ipynb.
+This tool receives the initialized model and provides SPARQL querying.
+For graph construction workflow, see csv2graph_maplib.ipynb and main.py.
 """
 
 import os
@@ -29,52 +27,24 @@ except ImportError:
 # Load environment variables
 load_dotenv()
 
-# Global Maplib model (singleton pattern)
-_jaguar_model = None
 
-
-def _initialize_jaguar_model() -> Model:
+def create_query_tool(model: Model):
     """
-    Initialize the Maplib model with ontology and instance data.
-
-    The knowledge graph can be built using:
-    - The csv2graph_maplib.ipynb notebook (CSV → Graph transformation)
-    - Manual RDF authoring in TTL files
-
-    This function simply loads the pre-built graph for querying.
-    """
-    global _jaguar_model
-
-    if _jaguar_model is not None:
-        return _jaguar_model
-
-    # Get the project root (2 levels up from this file)
-    project_root = Path(__file__).parent.parent.parent
-    data_dir = project_root / "data"
-
-    # Initialize Maplib model
-    _jaguar_model = Model()
-
-    # Load ontology (schema/classes/properties)
-    ontology_path = data_dir / "jaguar_ontology.ttl"
-    if ontology_path.exists():
-        _jaguar_model.read(str(ontology_path), format="turtle")
-
-    # Load instance data (actual jaguars, locations, organizations)
-    # This can be generated from csv2graph_maplib.ipynb or manually authored
-    instances_path = data_dir / "jaguars.ttl"
-    if instances_path.exists():
-        _jaguar_model.read(str(instances_path), format="turtle")
-
-    return _jaguar_model
-
-
-def query_jaguar_database(sparql_query: str) -> str:
-    """
-    Query the jaguar knowledge graph using SPARQL via Maplib. Use this tool when users ask questions about jaguars, jaguar populations, conservation efforts, habitats, threats, or any jaguar-related data. You must generate a valid SPARQL query based on the jaguar ontology. The tool will return raw JSON results that you must interpret and convert into natural language responses for the user.
+    Create a query tool function bound to a specific Maplib model.
     
     Args:
-        sparql_query: A valid SPARQL query to execute against the jaguar GraphDB aligning with this ontology:
+        model: Initialized Maplib Model with knowledge graph
+    
+    Returns:
+        Function that queries the jaguar knowledge graph
+    """
+    
+    def query_jaguar_database(sparql_query: str) -> str:
+        """
+        Query the jaguar knowledge graph using SPARQL via Maplib. Use this tool when users ask questions about jaguars, jaguar populations, conservation efforts, habitats, threats, or any jaguar-related data. You must generate a valid SPARQL query based on the jaguar ontology. The tool will return raw JSON results that you must interpret and convert into natural language responses for the user.
+        
+        Args:
+            sparql_query: A valid SPARQL query to execute against the jaguar GraphDB aligning with this ontology:
         
         @prefix ont: <http://example.org/ontology#>.
         @prefix : <http://example.org/resource#>.
@@ -395,63 +365,63 @@ def query_jaguar_database(sparql_query: str) -> str:
     
     Returns:
         JSON string containing query results from Maplib in-memory knowledge graph (SPARQL JSON format)
-    """
-    try:
-        # Initialize Maplib model (cached after first call)
-        model = _initialize_jaguar_model()
+        """
+        try:
+            # Model is provided from the closure (initialized in main.py)
+            # Execute SPARQL query using Maplib
+            result_df = model.query(sparql_query.strip())
 
-        # Execute SPARQL query using Maplib
-        result_df = model.query(sparql_query.strip())
+            # Convert Polars DataFrame to SPARQL JSON format
+            # This maintains compatibility with existing agent code
+            if result_df is None or len(result_df) == 0:
+                return json.dumps({
+                    "head": {"vars": []},
+                    "results": {"bindings": []}
+                }, indent=2)
 
-        # Convert Polars DataFrame to SPARQL JSON format
-        # This maintains compatibility with existing agent code
-        if result_df is None or len(result_df) == 0:
-            return json.dumps({
-                "head": {"vars": []},
-                "results": {"bindings": []}
-            }, indent=2)
+            # Get column names (SPARQL variables)
+            vars_list = result_df.columns
 
-        # Get column names (SPARQL variables)
-        vars_list = result_df.columns
-
-        # Convert rows to SPARQL JSON bindings format
-        bindings = []
-        for row in result_df.iter_rows(named=True):
-            binding = {}
-            for var, value in row.items():
-                if value is not None:
-                    # Determine type (simplified - Maplib handles RDF types)
-                    if isinstance(value, str):
-                        if value.startswith("http://") or value.startswith("https://"):
-                            binding[var] = {"type": "uri", "value": value}
+            # Convert rows to SPARQL JSON bindings format
+            bindings = []
+            for row in result_df.iter_rows(named=True):
+                binding = {}
+                for var, value in row.items():
+                    if value is not None:
+                        # Determine type (simplified - Maplib handles RDF types)
+                        if isinstance(value, str):
+                            if value.startswith("http://") or value.startswith("https://"):
+                                binding[var] = {"type": "uri", "value": value}
+                            else:
+                                binding[var] = {"type": "literal", "value": value}
+                        elif isinstance(value, bool):
+                            binding[var] = {
+                                "type": "literal",
+                                "value": str(value).lower(),
+                                "datatype": "http://www.w3.org/2001/XMLSchema#boolean"
+                            }
+                        elif isinstance(value, int):
+                            binding[var] = {
+                                "type": "literal",
+                                "value": str(value),
+                                "datatype": "http://www.w3.org/2001/XMLSchema#integer"
+                            }
                         else:
-                            binding[var] = {"type": "literal", "value": value}
-                    elif isinstance(value, bool):
-                        binding[var] = {
-                            "type": "literal",
-                            "value": str(value).lower(),
-                            "datatype": "http://www.w3.org/2001/XMLSchema#boolean"
-                        }
-                    elif isinstance(value, int):
-                        binding[var] = {
-                            "type": "literal",
-                            "value": str(value),
-                            "datatype": "http://www.w3.org/2001/XMLSchema#integer"
-                        }
-                    else:
-                        binding[var] = {"type": "literal", "value": str(value)}
-            bindings.append(binding)
+                            binding[var] = {"type": "literal", "value": str(value)}
+                bindings.append(binding)
 
-        result = {
-            "head": {"vars": vars_list},
-            "results": {"bindings": bindings}
-        }
+            result = {
+                "head": {"vars": vars_list},
+                "results": {"bindings": bindings}
+            }
 
-        return json.dumps(result, indent=2)
+            return json.dumps(result, indent=2)
 
-    except Exception as e:
-        return json.dumps({
-            "error": str(e),
-            "query": sparql_query,
-            "note": "Query executed against Maplib in-memory model"
-        }, indent=2)
+        except Exception as e:
+            return json.dumps({
+                "error": str(e),
+                "query": sparql_query,
+                "note": "Query executed against Maplib in-memory model"
+            }, indent=2)
+    
+    return query_jaguar_database
