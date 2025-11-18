@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from agent_framework.openai import OpenAIResponsesClient, OpenAISettings
 from agent_framework import ChatAgent
-from src.agents.jaguar_tool import create_query_tool
+from src.agents.jaguar_tool import create_query_jaguar_model_tool
 
 
 # Load environment variables
@@ -52,14 +52,14 @@ def create_jaguar_query_agent(jaguar_model):
     client = OpenAIResponsesClient(settings=settings)
     
     # Create query tool bound to this model
-    query_tool = create_query_tool(jaguar_model)
+    jaguar_query_tool = create_query_jaguar_model_tool(jaguar_model)
     
     # Create and return native Agent Framework agent
     agent = ChatAgent(
         client,
         name="JaguarQueryAgent",
         instructions=system_prompt,
-        tools=[query_tool],
+        tools=[jaguar_query_tool],
         tool_choice="auto"
     )
     

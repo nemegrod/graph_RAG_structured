@@ -1,287 +1,129 @@
 # Semantic Graph RAG with Maplib
 
-**Transform DataFrames into Knowledge Graphs in 3 lines of code**
+**Build Knowledge Graphs directly from DataFrames. No vector databases required.**
 
-This project demonstrates how to build a semantic Graph RAG system for structured data using Maplib, OTTR templates, and Microsoft Agent Framework—breaking away from the LangChain/vector embedding paradigm.
+This project demonstrates a **deterministic, high-precision Graph RAG** system for structured data. It targets Data Scientists and AI Engineers who want to build reliable agents over tabular data without losing the semantic structure to vector embeddings.
 
-## The Problem
+## 🎯 Who is this for?
 
-Vector embeddings lose structure. When you have tabular data with clear relationships, chunking and embedding destroys the very thing that makes your data valuable: its **structure and semantics**.
+- **Data Scientists**: You love Polars/Pandas but hate complex SQL joins. You want to query relationships, not just tables.
+- **AI Engineers**: You're tired of RAG hallucinations on structured data. You need an agent that can answer "How many male jaguars were killed in Arizona?" with 100% accuracy.
+- **Data Engineers**: You want a reproducible pipeline (ETL) from CSV to Knowledge Graph that fits into your existing Python workflows.
 
-## The Solution
+## 🧠 The Core Concept: "Don't Embed, Map."
 
-**Maplib + OTTR templates**: Transform DataFrames directly into RDF knowledge graphs while preserving relationships, semantics, and queryability.
+Standard RAG takes structured data (like a CSV), turns it into text chunks, embeds it, and then searches for "similar" chunks. This destroys the exact relationships in your data.
 
-```python
-from maplib import Model
+**Graph RAG with Maplib** preserves the structure:
 
-model = Model()
-model.add_template(ottr_template)  # Define transformation logic
-model.map("TemplateIRI", df)       # Transform DataFrame → Graph
-model.query(sparql_query)          # Query with precision
-```
+1.  **Define an Ontology (Schema)**: What are the "things" (Classes) and "relationships" (Properties)?
+2.  **Create a Template (OTTR)**: How does a row in your DataFrame map to that Ontology?
+3.  **Map**: Transform the DataFrame into a Graph in milliseconds.
+4.  **Query**: Let the Agent write SPARQL to query the graph precisely.
 
-## Architecture
+## 🚀 Quick Start
 
-### Core Components
-
-1. **Maplib** - High-performance RDF construction from DataFrames
-   - Rust-backed, Polars-native
-   - Zero-copy operations via Apache Arrow
-   - Built-in SPARQL querying
-
-2. **OTTR Templates** - Type-safe transformations
-   - Define CSV → RDF mapping once
-   - Reusable across datasets
-   - Enforces ontology compliance
-
-3. **Formal Ontology (RDFS/OWL)** - Semantic precision
-   - Class hierarchies
-   - Property constraints
-   - Reasoner-compatible
-
-4. **Microsoft Agent Framework** - Conversational AI
-   - Built-in DevUI
-   - Function calling
-   - Not LangChain
-
-### Why Not Neo4j?
-
-Property graphs lack formal semantics. RDF provides:
-- W3C standards (SPARQL, RDFS, OWL)
-- Inference and reasoning
-- Schema flexibility without migrations
-- Native interoperability
-
-### Why Not Vector Embeddings?
-
-For structured data:
-- Embeddings lose exact relationships
-- Similarity search is fuzzy when you need precision
-- You're discarding the structure you already have
-
-## Quick Start
-
-### Prerequisites
+### 1. Prerequisites
 
 ```bash
 pip install maplib polars python-dotenv
-pip install microsoft-agent-framework  # or equivalent
+# For the agent framework (if running the full demo)
+pip install -r requirements.txt
 ```
 
-### 1. Configure Environment
+### 2. The "Hello World" of Graph Mapping
 
-Create a `.env` file:
-
-```env
-# OpenAI Configuration
-OPENAI_API_KEY=your_openai_api_key_here
-OPENAI_RESPONSES_MODEL_ID=gpt-4
-```
-
-### 2. Initialize the Knowledge Graph
-
-```bash
-# Transform CSV to graph using OTTR templates
-python scripts/initialize_maplib.py
-
-# Export to Turtle format (optional)
-python scripts/initialize_maplib.py --export
-```
-
-### 3. Run the Agent
-
-```bash
-# Start the Microsoft Agent Framework DevUI
-python main.py
-```
-
-The DevUI will automatically open at `http://localhost:8000`
-
-## The Workflow
-
-### 1. Define Your Ontology
-
-```turtle
-# data/jaguar_ontology.ttl
-ont:Jaguar a owl:Class .
-ont:hasGender a owl:DatatypeProperty ;
-    rdfs:domain ont:Jaguar ;
-    rdfs:range xsd:string .
-```
-
-### 2. Create OTTR Templates
-
-```turtle
-# data/jaguar_template.ottr
-ont:JaguarInstance [
-  ?jaguarId : xsd:string,
-  ?name : xsd:string,
-  ?gender : xsd:string
-] :: {
-  cross | ottr:Triple(:{ ?jaguarId }, rdf:type, ont:Jaguar) ,
-  ottr:Triple(:{ ?jaguarId }, rdfs:label, ?name) ,
-  ottr:Triple(:{ ?jaguarId }, ont:hasGender, ?gender)
-} .
-```
-
-### 3. Prepare Your CSV
-
-```csv
-jaguar_id,name,gender,location
-ElJefe,El Jefe,Male,Arizona
-Sombra,Sombra,Male,Arizona
-```
-
-### 4. Transform to Graph
+This is all the code you need to turn a CSV into a queryable Knowledge Graph.
 
 ```python
 import polars as pl
 from maplib import Model
 
-# Load CSV as DataFrame
+# 1. Load your Data (It's just a DataFrame!)
 df = pl.read_csv("data/jaguars.csv")
+# ... (minimal preprocessing to create IRI strings) ...
 
-# Transform to RDF
+# 2. Initialize the Graph & Load Schema
 model = Model()
-model.add_template(ottr_template)
+model.read("data/jaguar_ontology.ttl", format="turtle")
+
+# 3. Define the Mapping (OTTR Template)
+# "Map this DataFrame to the 'JaguarInstance' template"
+model.add_template(open("data/jaguar_template.ottr").read())
 model.map("http://example.org/ontology#JaguarInstance", df)
+
+# 4. Query (SPARQL)
+# "Find all jaguars that were killed"
+results = model.query("""
+    PREFIX ont: <http://example.org/ontology#>
+    SELECT ?name ?cause WHERE {
+        ?j a ont:Jaguar ;
+           rdfs:label ?name ;
+           ont:wasKilled true ;
+           ont:causeOfDeath ?cause .
+    }
+""")
 ```
 
-### 5. Query with SPARQL
+## 🏗 Architecture
 
-```python
-# Find all male jaguars
-query = """
-PREFIX ont: <http://example.org/ontology#>
-SELECT ?name WHERE {
-    ?jaguar ont:hasGender "Male" .
-    ?jaguar rdfs:label ?name .
-}
-"""
-results = model.query(query)
+### Why Maplib?
+*   **Rust Core**: Built on Rust for performance, with Python bindings.
+*   **Polars Integration**: Uses Apache Arrow for zero-copy data transfer. It's extremely fast.
+*   **In-Memory**: Operates like a DataFrame—load it, map it, query it. No external database server (Neo4j/GraphDB) required for the application runtime.
+
+### The Pipeline
+```mermaid
+graph LR
+    A[CSV/Parquet] -->|Polars| B(DataFrame)
+    B -->|Maplib + OTTR| C(Knowledge Graph)
+    D[Ontology .ttl] --> C
+    E[Agent / LLM] -->|Generates SPARQL| C
+    C -->|Returns Results| E
 ```
 
-## Project Structure
+## 🤖 Agent Integration (The "AI" Part)
+
+Instead of "retrieving context" via vector similarity, the Agent acts as a **Semantic Query Engine**.
+
+1.  **User Query**: "Show me rescued jaguars that were released."
+2.  **LLM**: Understands the schema (`ont:isReleased`, `ont:rescuedBy`) and generates a SPARQL query.
+3.  **Maplib Tool**: Executes the exact SPARQL query against the in-memory graph.
+4.  **Response**: The LLM summarizes the precise results.
+
+*See `src/agents/jaguar_tool.py` for the implementation.*
+
+## 📂 Project Structure
 
 ```
 .
 ├── data/
-│   ├── jaguar_ontology.ttl      # Formal ontology (classes, properties)
-│   ├── jaguars.ttl              # Instance data (individuals)
-│   ├── jaguar_template.ottr     # OTTR templates for CSV → RDF
-│   └── jaguars.csv              # Source tabular data
+│   ├── jaguar_ontology.ttl      # The Schema (Classes/Properties)
+│   ├── jaguar_template.ottr     # The Mapping Rules (CSV -> RDF)
+│   └── jaguars.csv              # The Raw Data
 ├── src/
 │   └── agents/
-│       ├── jaguar_query_agent.py  # Agent with DevUI integration
-│       └── jaguar_tool.py         # Agent tool using Maplib
-├── scripts/
-│   └── initialize_maplib.py     # Initialize graph from CSV
-├── .claude/
-│   └── agents/
-│       └── data-manipulator.md  # Agent for RDF file manipulation
-├── main.py                      # DevUI entry point
-└── README.md                    # This file
+│       ├── jaguar_query_agent.py  # Agent definition
+│       └── jaguar_tool.py         # Tool that runs SPARQL on Maplib
+├── csv2graph_maplib.ipynb       # Interactive Tutorial (Start Here!)
+└── main.py                      # Entry point for the Agent DevUI
 ```
 
-## Use Case: Jaguar Conservation
+## 🆚 Comparison: Vector RAG vs. Maplib Graph RAG
 
-This demo uses jaguar conservation data to show:
+| Feature | Vector RAG (Standard) | Graph RAG (Maplib) |
+| :--- | :--- | :--- |
+| **Data Source** | Unstructured Text | Structured (CSV/SQL/JSON) |
+| **Retrieval** | Fuzzy Similarity (Cosine) | Exact Query (SPARQL) |
+| **Accuracy** | Probabilistic (Can Hallucinate) | Deterministic (100% Precision) |
+| **Reasoning** | Limited by context window | Infinite (via Graph Logic) |
+| **Setup** | Chunking + Embedding | Ontology + Mapping Template |
 
-- **Structured data** (individual jaguars, locations, organizations)
-- **Semantic relationships** (jaguars → habitats → locations)
-- **Complex queries** (which jaguars were killed, where, by what)
-- **Ontology-driven precision** (no fuzzy embeddings)
+## 📚 Key Resources for Data Scientists
 
-### Sample Queries
-
-Try these in the DevUI:
-
-**Basic Queries:**
-- "How many jaguars are in the database?"
-- "Show me all male jaguars"
-
-**Relationship Queries:**
-- "Which jaguars were killed and what was the cause?"
-- "Find jaguars by location"
-
-**Complex Queries:**
-- "Which organizations are monitoring jaguars in Arizona?"
-- "Show me rescued jaguars that were released"
-
-## Why This Approach?
-
-### For Data Scientists
-- Stay in your DataFrame workflow (Polars)
-- No need to learn graph databases
-- Transform data you already have
-
-### For Knowledge Engineers
-- Formal semantics (RDFS/OWL)
-- Reasoner compatibility
-- Standards-compliant (W3C)
-
-### For Application Developers
-- Fast (Rust-backed)
-- Portable (no external database)
-- SPARQL precision for complex queries
-
-## Comparison
-
-| Approach | Best For | Limitations |
-|----------|----------|-------------|
-| **Vector RAG** | Unstructured text, semantic similarity | Loses structure, fuzzy results |
-| **Neo4j/LPG** | Application-specific graphs | No formal semantics, vendor lock-in |
-| **Maplib + RDF** | Structured data with relationships | Requires ontology design |
-
-## Key Differences from Standard RAG
-
-### Standard RAG (LangChain + Vectors)
-```python
-# Chunk and embed
-chunks = text_splitter.split(csv_content)
-embeddings = OpenAIEmbeddings().embed(chunks)
-vectorstore.add(embeddings)
-
-# Query (fuzzy similarity)
-results = vectorstore.similarity_search(query)
-```
-
-### This Approach (Maplib + OTTR)
-```python
-# Preserve structure
-model.add_template(ottr_template)
-model.map("TemplateIRI", dataframe)
-
-# Query (precise SPARQL)
-results = model.query(sparql_query)
-```
-
-**The difference**: Structure preservation vs. dimensionality reduction.
-
-## Performance
-
-Maplib is built on:
-- **Rust** for high performance
-- **Polars** for DataFrame operations
-- **Apache Arrow** for zero-copy data transfer
-- **In-memory** processing (no network overhead)
-
-Typical query times: **< 10ms** for datasets with thousands of triples.
-
-## References
-
-- [Maplib](https://github.com/DataTreehouse/maplib) - High-performance RDF construction
-- [OTTR](http://ottr.xyz/) - Ontology Transformation Template Registry
-- [Microsoft Agent Framework](https://learn.microsoft.com/en-us/semantic-kernel/) - Conversational AI
-- [RDF](https://www.w3.org/RDF/) - Resource Description Framework
-- [SPARQL](https://www.w3.org/TR/sparql11-query/) - Query language for RDF
-- [Polars](https://pola.rs/) - Fast DataFrame library
-
-## License
-
-MIT
+*   **Maplib**: [GitHub](https://github.com/DataTreehouse/maplib) - The engine powering this.
+*   **OTTR**: [Website](http://ottr.xyz/) - Learn how to write templates that map tables to triples.
+*   **SPARQL**: Don't be afraid! It's just SQL for Graphs. `SELECT ?s WHERE { ?s ?p ?o }`.
 
 ---
-
-**Built with tools you haven't heard of. Breaks every RAG "best practice". Works better for structured data.**
+*Built for the [Microsoft Agent Framework](https://github.com/microsoft/agent-framework).*

@@ -16,7 +16,6 @@ For graph construction workflow, see csv2graph_maplib.ipynb and main.py.
 
 import os
 import json
-from pathlib import Path
 from dotenv import load_dotenv
 
 try:
@@ -28,9 +27,10 @@ except ImportError:
 load_dotenv()
 
 
-def create_query_tool(model: Model):
+def create_query_jaguar_model_tool(model: Model):
     """
-    Create a query tool function bound to a specific Maplib model.
+    Create a query tool function bound to a specific Maplib model. In this case with hardcoded description
+    This is necessary to be able to pass the model to the tool without breaking the tool calling pattern for the agent. 
     
     Args:
         model: Initialized Maplib Model with knowledge graph
@@ -39,7 +39,7 @@ def create_query_tool(model: Model):
         Function that queries the jaguar knowledge graph
     """
     
-    def query_jaguar_database(sparql_query: str) -> str:
+    def query_model_tool(sparql_query: str) -> str:
         """
         Query the jaguar knowledge graph using SPARQL via Maplib. Use this tool when users ask questions about jaguars, jaguar populations, conservation efforts, habitats, threats, or any jaguar-related data. You must generate a valid SPARQL query based on the jaguar ontology. The tool will return raw JSON results that you must interpret and convert into natural language responses for the user.
         
@@ -424,4 +424,4 @@ def create_query_tool(model: Model):
                 "note": "Query executed against Maplib in-memory model"
             }, indent=2)
     
-    return query_jaguar_database
+    return query_model_tool
