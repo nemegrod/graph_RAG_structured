@@ -21,6 +21,21 @@ Standard RAG takes structured data (like a CSV), turns it into text chunks, embe
 3.  **Map**: Transform the DataFrame into a Graph in milliseconds.
 4.  **Query**: Let the Agent write SPARQL to query the graph precisely.
 
+
+**Maplib** is a high-performance Python library for mapping DataFrames to RDF Knowledge Graphs. Built on Rust and Polars, it enables extremely fast, in-memory graph construction and SPARQL querying without the overhead of a dedicated graph database server. It is designed for data scientists who want to integrate semantic technologies into their Python workflows.
+
+-   **GitHub**: [DataTreehouse/maplib](https://github.com/DataTreehouse/maplib)
+-   **PyPI**: [maplib](https://pypi.org/project/maplib/)
+-   **Documentation**: [Maplib Docs](https://datatreehouse.github.io/maplib/maplib.html)
+
+**OTTR (Reasonable Ontology Templates)** is a language for representing ontology patterns. It allows you to define reusable "macros" or templates that abstract away the complexity of RDF triples. In this project, we use OTTR to define *how* a row in a DataFrame maps to the graph structure, ensuring type safety and consistency.
+
+-   **Website**: [ottr.xyz](http://ottr.xyz/)
+-   **Specification**: [w3id.org/ottr](https://www.w3.org/community/ottr/)
+-   **Learn More**: [OTTR Primer](http://ottr.xyz/primer/)
+
+
+
 ## 🚀 Quick Start
 
 ### 1. Prerequisites
@@ -91,6 +106,8 @@ graph LR
 ```
 
 ## 🤖 Agent Integration (The "AI" Part)
+
+If you want to understand more of the "graph RAG" part of this repo, check out my graph RAG template repo: (https://github.com/nemegrod/graph_RAG)
 
 ### Features
 
