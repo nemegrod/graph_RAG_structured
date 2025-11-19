@@ -1,0 +1,13 @@
+jaguar_id,name,gender,location,monitoring_org,first_sighted,is_killed,cause_of_death,identification_mark,threats,monitoring_technique,status_notes
+ElJefe,El Jefe,Male,WhetstoneMountains;SantaRitaMountains;Sonora,UnivOfArizona;ConservationCATalyst;NorthernJaguarProject,2011-11-19,false,,Unique spot patterns,,CameraTrap;ScatDetection,
+MachoB,Macho B,Male,BaboquivariMountains,,1996-01-01,true,Euthanasia following kidney failure caused by capture,Mark resembling Betty Boop,SnareTrap,GPSTracking,
+Sombra,Sombra,Male,DosCabezasMountains;ChiricahuaMountains,,2016-11-01,false,,,,CameraTrap;GPSTracking,
+Yooko,Yo'oko,Male,HuachucaMountains;Sonora,,,true,Killed by mountain lion hunter,,Poaching,,
+Cochise,Cochise,Male,HuachucaMountains,,2023-12-20,false,,,,CameraTrap,
+Asa,Asa,Female,Pantanal,PantanalJaguarProject,2008-03-15,false,,Light colored coat with widely spaced rosettes,,,
+Mick,Mick,Male,Pantanal,PantanalJaguarProject,2015-06-22,false,,Large male with prominent rosettes,,,
+Ferinha,Ferinha,Female,Pantanal,PantanalJaguarProject,2012-09-10,false,,Small female with dense rosette pattern,,,
+OshadNukudam,O:ṣhad Ñu:kudam,,Arizona,,,false,,,,,
+Mariposa,Mariposa,Female,HatoLaAurora,PantheraColombia,2009-01-01,false,,,,,
+Cayenita,Cayenita,Female,HatoLaAurora,,,false,,,,,
+Xama,Xamã,Male,AmazonRainforest,,,false,,,WildfireThreat,GPSTracking,Orphaned;Rehabilitated;Released

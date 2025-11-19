@@ -1,19 +1,50 @@
+"""
+Jaguar Knowledge Graph Query Tool
+
+This module provides a SPARQL query interface for the jaguar conservation
+knowledge graph using Maplib (in-memory RDF store).
+
+The knowledge graph is built in main.py using the production pipeline:
+1. Load ontology (data/jaguar_ontology.ttl)
+2. Load OTTR template (data/jaguar_template.ottr)
+3. Transform CSV to RDF (data/jaguars.csv)
+4. Optionally load additional manually-curated data (data/jaguars.ttl)
+
+This tool receives the initialized model and provides SPARQL querying.
+For graph construction workflow, see csv2graph.ipynb and main.py.
+"""
+
 import os
 import json
-import requests
-from urllib.parse import urlencode
 from dotenv import load_dotenv
+
+try:
+    from maplib import Model
+except ImportError:
+    raise ImportError("maplib is required. Install with: pip install maplib")
 
 # Load environment variables
 load_dotenv()
 
 
-def query_jaguar_database(sparql_query: str) -> str:
+def create_query_jaguar_model_tool(model: Model):
     """
-    Query the GraphDB database using SPARQL. Use this tool when users ask questions about jaguars, jaguar populations, conservation efforts, habitats, threats, or any jaguar-related data. You must generate a valid SPARQL query based on the jaguar ontology. The tool will return raw JSON results from GraphDB that you must interpret and convert into natural language responses for the user.
+    Create a query tool function bound to a specific Maplib model. In this case with hardcoded description
+    This is necessary to be able to pass the model to the tool without breaking the tool calling pattern for the agent. 
     
     Args:
-        sparql_query: A valid SPARQL query to execute against the jaguar GraphDB aligning with this ontology:
+        model: Initialized Maplib Model with knowledge graph
+    
+    Returns:
+        Function that queries the jaguar knowledge graph
+    """
+    
+    def query_model_tool(sparql_query: str) -> str:
+        """
+        Query the jaguar knowledge graph using SPARQL via Maplib. Use this tool when users ask questions about jaguars, jaguar populations, conservation efforts, habitats, threats, or any jaguar-related data. You must generate a valid SPARQL query based on the jaguar ontology. The tool will return raw JSON results that you must interpret and convert into natural language responses for the user.
+        
+        Args:
+            sparql_query: A valid SPARQL query to execute against the jaguar GraphDB aligning with this ontology:
         
         @prefix ont: <http://example.org/ontology#>.
         @prefix : <http://example.org/resource#>.
@@ -333,33 +364,64 @@ def query_jaguar_database(sparql_query: str) -> str:
         - Always include relevant prefixes in the query.
     
     Returns:
-        JSON string containing query results from GraphDB
-    """
-    try:
-        # GraphDB configuration
-        url = os.getenv("GRAPHDB_URL", "http://localhost:7200")
-        repository = os.getenv("GRAPHDB_REPOSITORY", "")
-        sparql_endpoint = f"{url}/repositories/{repository}"
-        
-        # Execute SPARQL query
-        params = {'query': sparql_query.strip()}
-        headers = {
-            'Accept': 'application/sparql-results+json',
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
-        
-        response = requests.post(
-            sparql_endpoint,
-            data=urlencode(params),
-            headers=headers,
-            timeout=30
-        )
-        
-        response.raise_for_status()
-        result = response.json()
-        return json.dumps(result, indent=2)
-        
-    except requests.exceptions.ConnectionError as e:
-        return json.dumps({"error": f"Could not connect to GraphDB at {url}", "query": sparql_query})
-    except Exception as e:
-        return json.dumps({"error": str(e), "query": sparql_query})
+        JSON string containing query results from Maplib in-memory knowledge graph (SPARQL JSON format)
+        """
+        try:
+            # Model is provided from the closure (initialized in main.py)
+            # Execute SPARQL query using Maplib
+            result_df = model.query(sparql_query.strip())
+
+            # Convert Polars DataFrame to SPARQL JSON format
+            # This maintains compatibility with existing agent code
+            if result_df is None or len(result_df) == 0:
+                return json.dumps({
+                    "head": {"vars": []},
+                    "results": {"bindings": []}
+                }, indent=2)
+
+            # Get column names (SPARQL variables)
+            vars_list = result_df.columns
+
+            # Convert rows to SPARQL JSON bindings format
+            bindings = []
+            for row in result_df.iter_rows(named=True):
+                binding = {}
+                for var, value in row.items():
+                    if value is not None:
+                        # Determine type (simplified - Maplib handles RDF types)
+                        if isinstance(value, str):
+                            if value.startswith("http://") or value.startswith("https://"):
+                                binding[var] = {"type": "uri", "value": value}
+                            else:
+                                binding[var] = {"type": "literal", "value": value}
+                        elif isinstance(value, bool):
+                            binding[var] = {
+                                "type": "literal",
+                                "value": str(value).lower(),
+                                "datatype": "http://www.w3.org/2001/XMLSchema#boolean"
+                            }
+                        elif isinstance(value, int):
+                            binding[var] = {
+                                "type": "literal",
+                                "value": str(value),
+                                "datatype": "http://www.w3.org/2001/XMLSchema#integer"
+                            }
+                        else:
+                            binding[var] = {"type": "literal", "value": str(value)}
+                bindings.append(binding)
+
+            result = {
+                "head": {"vars": vars_list},
+                "results": {"bindings": bindings}
+            }
+
+            return json.dumps(result, indent=2)
+
+        except Exception as e:
+            return json.dumps({
+                "error": str(e),
+                "query": sparql_query,
+                "note": "Query executed against Maplib in-memory model"
+            }, indent=2)
+    
+    return query_model_tool

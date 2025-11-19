@@ -7,5 +7,7 @@ agent-framework>=1.0.0b251007
 flask==3.0.0
 python-dotenv>=1.0.0
 requests==2.31.0
+polars>=0.20.0
+maplib>=0.1.0
 
 # Note: pydantic and openai versions managed by agent-framework

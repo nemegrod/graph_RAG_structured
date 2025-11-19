@@ -1,0 +1,45 @@
+@prefix ont: <http://example.org/ontology#> .
+@prefix res: <http://example.org/resource#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ont:JaguarInstance [
+  <http://ns.ottr.xyz/0.4/IRI> ?id,
+  <http://www.w3.org/2001/XMLSchema#string> ?name,
+  ? <http://www.w3.org/2001/XMLSchema#string> ?gender,
+  ? <http://www.w3.org/2001/XMLSchema#string> ?location,
+  ? <http://ns.ottr.xyz/0.4/IRI> ?location_iri,
+  ? <http://www.w3.org/2001/XMLSchema#string> ?monitoring_org,
+  ? <http://ns.ottr.xyz/0.4/IRI> ?monitoring_org_iri,
+  ? <http://www.w3.org/2001/XMLSchema#string> ?first_sighted,
+  <http://www.w3.org/2001/XMLSchema#boolean> ?is_killed,
+  ? <http://www.w3.org/2001/XMLSchema#string> ?cause_of_death,
+  ? <http://www.w3.org/2001/XMLSchema#string> ?identification_mark,
+  ? <http://www.w3.org/2001/XMLSchema#string> ?threats,
+  ? <http://ns.ottr.xyz/0.4/IRI> ?threat_iri,
+  ? <http://www.w3.org/2001/XMLSchema#string> ?monitoring_technique,
+  ? <http://ns.ottr.xyz/0.4/IRI> ?technique_iri,
+  ? <http://www.w3.org/2001/XMLSchema#string> ?status_notes
+] :: {
+  ottr:Triple(?id, a, ont:Jaguar),
+  ottr:Triple(?id, rdfs:label, ?name),
+  ottr:Triple(?id, ont:scientificName, "Panthera onca"),
+  ottr:Triple(?id, ont:hasGender, ?gender),
+  ottr:Triple(?id, ont:occursIn, ?location_iri),
+  ottr:Triple(?location_iri, a, ont:Location),
+  ottr:Triple(?location_iri, rdfs:label, ?location),
+  ottr:Triple(?id, ont:monitoredByOrg, ?monitoring_org_iri),
+  ottr:Triple(?monitoring_org_iri, a, ont:ConservationOrganization),
+  ottr:Triple(?monitoring_org_iri, rdfs:label, ?monitoring_org),
+  ottr:Triple(?id, ont:hasMonitoringStartDate, ?first_sighted),
+  ottr:Triple(?id, ont:wasKilled, ?is_killed),
+  ottr:Triple(?id, ont:causeOfDeath, ?cause_of_death),
+  ottr:Triple(?id, ont:hasIdentificationMark, ?identification_mark),
+  ottr:Triple(?id, ont:facesThreat, ?threat_iri),
+  ottr:Triple(?threat_iri, a, ont:Threat),
+  ottr:Triple(?threat_iri, rdfs:label, ?threats),
+  ottr:Triple(?id, ont:monitoredByTechnique, ?technique_iri),
+  ottr:Triple(?technique_iri, a, ont:MonitoringTechnique),
+  ottr:Triple(?technique_iri, rdfs:label, ?monitoring_technique),
+  ottr:Triple(?id, rdfs:comment, ?status_notes),
+  ottr:Triple(?id, ont:hasDietType, res:CarnivoreDiet)
+} .

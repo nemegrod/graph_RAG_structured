@@ -64,32 +64,11 @@ ont:NGO a owl:Class ; rdfs:subClassOf ont:ConservationOrganization.
 ont:AcademicInstitution a owl:Class ; rdfs:subClassOf ont:ConservationOrganization.
 
 ont:Threat a owl:Class.
-ont:AnthropogenicThreat a owl:Class ; rdfs:subClassOf ont:Threat.
-ont:HabitatLoss a owl:Class ; rdfs:subClassOf ont:AnthropogenicThreat.
-ont:HabitatFragmentation a owl:Class ; rdfs:subClassOf ont:AnthropogenicThreat.
-ont:Poaching a owl:Class ; rdfs:subClassOf ont:AnthropogenicThreat.
-ont:IllegalWildlifeTrade a owl:Class ; rdfs:subClassOf ont:AnthropogenicThreat.
-ont:HumanWildlifeConflict a owl:Class ; rdfs:subClassOf ont:AnthropogenicThreat.
-ont:BorderBarrier a owl:Class ; rdfs:subClassOf ont:AnthropogenicThreat.
-ont:EnvironmentalThreat a owl:Class ; rdfs:subClassOf ont:Threat.
-ont:ClimateChange a owl:Class ; rdfs:subClassOf ont:EnvironmentalThreat.
-ont:Wildfire a owl:Class ; rdfs:subClassOf ont:EnvironmentalThreat.
+
 
 ont:ConservationEffort a owl:Class.
-ont:RecoveryPlan a owl:Class ; rdfs:subClassOf ont:ConservationEffort.
-ont:WildlifeCorridor a owl:Class ; rdfs:subClassOf ont:ConservationEffort.
-ont:RewildingProgram a owl:Class ; rdfs:subClassOf ont:ConservationEffort.
-ont:CommunityEngagement a owl:Class ; rdfs:subClassOf ont:ConservationEffort.
-ont:InternationalCooperation a owl:Class ; rdfs:subClassOf ont:ConservationEffort.
 ont:MonitoringTechnique a owl:Class.
-ont:CameraTrap a owl:Class ; rdfs:subClassOf ont:MonitoringTechnique.
-ont:ScatDetection a owl:Class ; rdfs:subClassOf ont:MonitoringTechnique.
-ont:GPSTracking a owl:Class ; rdfs:subClassOf ont:MonitoringTechnique.
-
 ont:LegalFramework a owl:Class.
-ont:Act a owl:Class ; rdfs:subClassOf ont:LegalFramework.
-ont:Convention a owl:Class ; rdfs:subClassOf ont:LegalFramework.
-
 ont:CulturalSignificance a owl:Class.
 ont:EconomicBenefit a owl:Class.
 

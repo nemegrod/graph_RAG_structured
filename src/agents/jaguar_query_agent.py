@@ -3,16 +3,19 @@ import os
 from dotenv import load_dotenv
 from agent_framework.openai import OpenAIResponsesClient, OpenAISettings
 from agent_framework import ChatAgent
-from src.agents.jaguar_tool import query_jaguar_database
+from src.agents.jaguar_tool import create_query_jaguar_model_tool
 
 
 # Load environment variables
 load_dotenv()
 
 
-def create_jaguar_query_agent():
+def create_jaguar_query_agent(jaguar_model):
     """
     Create and return a native Agent Framework agent for jaguar conservation.
+    
+    Args:
+        jaguar_model: Initialized Maplib Model with knowledge graph
     
     Returns:
         Agent Framework ChatAgent instance
@@ -48,12 +51,15 @@ def create_jaguar_query_agent():
     # Create client
     client = OpenAIResponsesClient(settings=settings)
     
+    # Create query tool bound to this model
+    jaguar_query_tool = create_query_jaguar_model_tool(jaguar_model)
+    
     # Create and return native Agent Framework agent
     agent = ChatAgent(
         client,
         name="JaguarQueryAgent",
         instructions=system_prompt,
-        tools=[query_jaguar_database],
+        tools=[jaguar_query_tool],
         tool_choice="auto"
     )
     
