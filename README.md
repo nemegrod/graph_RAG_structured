@@ -125,8 +125,8 @@ Instead of "retrieving context" via vector similarity, the Agent acts as a **Sem
 │   └── agents/
 │       ├── jaguar_query_agent.py  # Agent definition
 │       └── jaguar_tool.py         # Tool that runs SPARQL on Maplib
-├── csv2graph_maplib.ipynb       # Interactive Tutorial (Start Here!)
-└── main.py                      # Entry point for the Agent DevUI
+├── csv2graph.ipynb                # Interactive Tutorial (Start Here!)
+└── main.py                        # Entry point for the Agent DevUI
 ```
 
 ## 🆚 Comparison: Vector RAG vs. Maplib Graph RAG

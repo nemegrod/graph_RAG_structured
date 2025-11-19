@@ -11,7 +11,7 @@ The knowledge graph is built in main.py using the production pipeline:
 4. Optionally load additional manually-curated data (data/jaguars.ttl)
 
 This tool receives the initialized model and provides SPARQL querying.
-For graph construction workflow, see csv2graph_maplib.ipynb and main.py.
+For graph construction workflow, see csv2graph.ipynb and main.py.
 """
 
 import os
