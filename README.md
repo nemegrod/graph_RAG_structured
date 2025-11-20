@@ -6,6 +6,8 @@ This project demonstrates a **deterministic, high-precision Graph RAG** system f
 
 **If you find it useful, please Star ⭐ the repo so it becomes easier for others to find!**
 
+If you want to understand more of the "graph RAG" part of this repo, check out my graph RAG template repo: (https://github.com/nemegrod/graph_RAG)
+
 ## 🎯 Who is this for?
 
 - **Data Scientists**: You love Polars/Pandas but you are struggling with knowledge graphs. Here is your help
@@ -106,7 +108,7 @@ graph LR
 
 ## 🤖 Agent Integration (The "AI" Part)
 
-If you want to understand more of the "graph RAG" part of this repo, check out my graph RAG template repo: (https://github.com/nemegrod/graph_RAG)
+
 
 ### Features
 
