@@ -2,7 +2,9 @@
 
 **Build Knowledge Graphs directly from DataFrames. No vector databases required.**
 
-This project demonstrates a **deterministic, high-precision Graph RAG** system for structured data. It targets Data Scientists and AI Engineers who want to build reliable agents over tabular data without losing the semantic structure to vector embeddings. If you find it useful, please Star ⭐ the repo so it becomes easier for oithers to find!
+This project demonstrates a **deterministic, high-precision Graph RAG** system for structured data. It targets Data Scientists and AI Engineers who want to build reliable agents over tabular data without losing the semantic structure to vector embeddings. 
+
+**If you find it useful, please Star ⭐ the repo so it becomes easier for others to find!**
 
 ## 🎯 Who is this for?
 
