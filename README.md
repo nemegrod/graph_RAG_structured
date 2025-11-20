@@ -2,7 +2,7 @@
 
 **Build Knowledge Graphs directly from DataFrames. No vector databases required.**
 
-This project demonstrates a **deterministic, high-precision Graph RAG** system for structured data. It targets Data Scientists and AI Engineers who want to build reliable agents over tabular data without losing the semantic structure to vector embeddings.
+This project demonstrates a **deterministic, high-precision Graph RAG** system for structured data. It targets Data Scientists and AI Engineers who want to build reliable agents over tabular data without losing the semantic structure to vector embeddings. If you find it useful, please Star ⭐ the repo so it becomes easier for oithers to find!
 
 ## 🎯 Who is this for?
 
@@ -30,10 +30,7 @@ Standard RAG takes structured data (like a CSV), turns it into text chunks, embe
 
 **OTTR (Reasonable Ontology Templates)** is a language for representing ontology patterns. It allows you to define reusable "macros" or templates that abstract away the complexity of RDF triples. In this project, we use OTTR to define *how* a row in a DataFrame maps to the graph structure, ensuring type safety and consistency.
 
--   **Website**: [ottr.xyz](http://ottr.xyz/)
--   **Specification**: [w3id.org/ottr](https://www.w3.org/community/ottr/)
--   **Learn More**: [OTTR Primer](http://ottr.xyz/primer/)
-
+-   **Learn more**: [ottr.xyz](http://ottr.xyz/)
 
 
 ## 🚀 Quick Start
